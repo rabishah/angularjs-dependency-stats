@@ -6,31 +6,39 @@ var express = require('express');
 
 var _ = require('./util.js');
 
-const baseDir = path.resolve(__dirname, '../thoughtspot/blink/app/src');
+if (!process.argv[2]) {
+    console.error('Please enter your AngularJS project folder');
+    return process.exit(1);
+}
 
-/* files info*/
+const baseDir = path.resolve(__dirname, process.argv[2]);
+
+const filter = function(x, y) {
+    return x.filter(function(a) {
+        return a.match(y);
+    });
+};
+
+const getDeps = function (array, fn) {
+    return array.reduce(function (accumulator, currentValue) {
+        return accumulator.concat(fn(shx.cat(currentValue).toString()));
+    }, []);
+};
+
+/* filter files by js, ts and tests */
 const all = shx.find(baseDir);
 
-const js  = all.filter(function(file) { return file.match(/\.js$/); });
-const ts  = all.filter(function(file) { return file.match(/\.ts$/); });
+const js = filter(all, /\.js$/);
+const ts = filter(all, /\.ts$/);
 
-const jsOnly = js.filter(function(file) { return !file.match(/\-spec.js$/); });
-const tsOnly = ts.filter(function(file) { return !file.match(/\-spec.ts$/); });
+const jsOnly = filter(js, /(?<!\-spec.js)$/);
+const tsOnly = filter(ts, /(?<!\-spec.ts)$/);
 
-const jsTests = js.filter(function(file) { return file.match(/\-spec.js$/); });
-const tsTests = ts.filter(function(file) { return file.match(/\-spec.ts$/); });
+const jsTests = filter(js, /\-spec.js$/);
+const tsTests = filter(ts, /\-spec.ts$/);
 
-/* get our Angular component types, name and deps*/
-let info = [];
-jsOnly.forEach(function (js) {
-    info = info.concat(_.getJSContentInfo(shx.cat(js).toString()));
-});
-
-/* get TypeScript dependencies on JS component */
-let tsInfo = [];
-tsOnly.forEach(function (t) {
-    tsInfo = tsInfo.concat(_.getTSContentInfo(shx.cat(t).toString()));
-});
+const jsInfo = getDeps(jsOnly, _.getJSContentInfo);
+const tsInfo = getDeps(tsOnly, _.getTSContentInfo);
 
 /* express */
 const app = express();
@@ -40,13 +48,13 @@ app.get('/', (req, res) => res.sendFile('index.html'));
 app.get('/graph', (req, res) => res.sendFile(path.join(__dirname, 'public/graph.html')));
 app.get('/info', (req, res) => res.send({
     counts: {
-        js : jsOnly.length,
-        ts : tsOnly.length,
-        jsTests : jsTests.length,
-        tsTests : tsTests.length
+        js: jsOnly.length,
+        ts: tsOnly.length,
+        jsTests: jsTests.length,
+        tsTests: tsTests.length
     },
-    jsComponentList : info,
-    tsDeps : tsInfo
+    jsComponentList: jsInfo,
+    tsDeps: tsInfo
 }));
 
 app.listen(3000, () => console.log('Application listening on port 3000!'));
