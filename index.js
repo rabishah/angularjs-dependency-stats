@@ -21,7 +21,7 @@ const filter = function(x, y) {
 
 const getDeps = function (array, fn) {
     return array.reduce(function (accumulator, currentValue) {
-        return accumulator.concat(fn(shx.cat(currentValue).toString()));
+        return accumulator.concat(fn(shx.cat(currentValue).toString(), currentValue));
     }, []);
 };
 
@@ -44,8 +44,6 @@ const tsInfo = getDeps(tsOnly, _.getTSContentInfo);
 const app = express();
 app.use(express.static('public'));
 
-app.get('/', (req, res) => res.sendFile('index.html'));
-app.get('/graph', (req, res) => res.sendFile(path.join(__dirname, 'public/graph.html')));
 app.get('/info', (req, res) => res.send({
     counts: {
         js: jsOnly.length,
@@ -57,4 +55,4 @@ app.get('/info', (req, res) => res.send({
     tsDeps: tsInfo
 }));
 
-app.listen(3000, () => console.log('Application listening on port 3000!'));
+app.listen(5000, () => console.log('Application listening on port 5000!'));

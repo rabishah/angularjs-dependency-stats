@@ -1,6 +1,6 @@
 'use strict';
 
-function getJSContentInfo(content) {
+function getJSContentInfo(content, path) {
     const info = [];
     const regExp1 = /blink\.app\.((?!.*?component).*)\(\'(.*?),((.|\n)*?)function\s*[^\(]*\(\s*([^\)]*)\)/g;
 
@@ -12,7 +12,8 @@ function getJSContentInfo(content) {
             name: match[2].replace("\'", ''),
             deps: match[5].split(',').map(function (s) {
                 return s.trim('\s', '').replace('\n', '')
-            })
+            }),
+            path: path
         });
 
         match = regExp1.exec(content);
