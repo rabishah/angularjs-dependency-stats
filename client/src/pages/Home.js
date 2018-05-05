@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import {Link} from 'react-router-dom';
 import styled from 'styled-components';
 import _ from '../utils';
 
@@ -8,7 +9,6 @@ import {
     CardTitle,
     CardValue,
     Title,
-    Link,
     Monospace,
     Panel,
     SearchInput
@@ -130,7 +130,7 @@ class Home extends Component {
     getTables(list, header, valueProperty) {
         let $list = list.map((e, idx) => (
             <tr key={idx + '__' + header}>
-                <td><Monospace>{e.name}</Monospace></td>
+                <td><Monospace><Link to={"/js/" + e.name}>{e.name}</Link></Monospace></td>
                 <td>{e[valueProperty]}</td>
             </tr>
         ));

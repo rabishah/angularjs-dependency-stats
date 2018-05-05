@@ -55,4 +55,20 @@ app.get('/info', (req, res) => res.send({
     tsDeps: tsInfo
 }));
 
+app.get('/file', (req, res) => {
+    const path = JSON.parse(req.query.path);
+    res.send({ 'info': shx.cat(path).toString() });
+});
+
+app.get('/compile', (req, res) => {
+    const path = JSON.parse(req.query.path);
+    const { stdout, stderr, code } = shx.exec('npm run compile ' + path, { silent: true });
+    if (code === 0) {
+        res.send({ info: shx.cat(path.replace(/.js$/g, '.ts')).toString()});
+        shx.rm('rf', path.replace(/.js$/g, '.ts'));
+    } else {
+        res.send({'info': stdout});
+    }
+});
+
 app.listen(5000, () => console.log('Application listening on port 5000!'));

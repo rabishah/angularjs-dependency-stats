@@ -4,13 +4,15 @@
   "description": "js to ts migration",
   "main": "index.js",
   "scripts": {
-      "client": "cd client && yarn start",
-      "server": "nodemon index.js ../thoughtspot/blink/app/src",
-      "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\""
+    "client": "cd client && yarn start",
+    "server": "nodemon index.js ../thoughtspot/blink/app/src",
+    "dev": "concurrently --kill-others-on-fail \"yarn server\" \"yarn client\"",
+    "compile": "./compile.sh"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "angularjs-to-typescript": "1.1.2",
     "express": "^4.16.3",
     "shelljs": "^0.8.1"
   },

@@ -1,18 +1,11 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import Home from './pages/Home';
 import JSDeps from './pages/JSDeps';
 import FourOhFour from './pages/FourOhFour';
 
 import './App.css';
-
-import history from './history';
-
-const PAGES = {
-  '/': Home,
-  '/jsdeps': JSDeps
-};
 
 class App extends Component {
   state = {
@@ -26,14 +19,6 @@ class App extends Component {
       .catch(error => console.log(error));
   };
 
-  componentDidMount() {
-    const self = this;
-
-    history.onChange((pathname) => {
-      self.setState({ pathname })
-    });
-  }
-
   callApi = async () => {
     const response = await fetch('/info');
     const body = await response.json();
@@ -44,13 +29,16 @@ class App extends Component {
   };
 
   render() {
-    const Handler = PAGES[this.state.pathname] || FourOhFour;
-    return <Handler data={this.state.response} />;
+    const {response} = this.state;
+    return (
+      <Router>
+        <div>
+          <Route exact path="/" render={(props) => <Home {...props} data={response} />} />
+          <Route path="/js" render={(props) => <JSDeps {...props} data={response} />} />
+        </div>
+      </Router>
+    )
   }
 }
-
-App.propTypes = {
-  pathname: PropTypes.oneOf(Object.keys(PAGES)).isRequired,
-};
 
 export default App;

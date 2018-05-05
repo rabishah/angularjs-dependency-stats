@@ -1,9 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
-import {Link as _Link} from './Link';
 import _Panel from './Panel';
 
-export const Link = _Link;
 export const Panel = _Panel;
 
 export const Caption = styled.i`
