@@ -21,68 +21,6 @@ const DataTextMap = {
     'tsTests': 'TS Tests'
 };
 
-const CardList = styled.div`
-    display: flex;
-    margin: 40px 0;
-
-    & > div {
-        margin-right: 20px;
-    }
-`;
-
-const Tables = styled.div`
-    display: flex;
-
-    table {
-        margin-right: 40px;
-    }
-
-    th {
-        text-align: left;
-        font-weight: bold;
-        padding-bottom: 20px;
-    }
-`;
-
-const Layout = styled.div`
-    display: flex;
-    padding: 80px 0 80px 80px;
-`;
-const Content = styled.div`flex: 5;`;
-const Sidebar = styled.div`
-    flex:2;
-    background: #f4f6f8;
-    padding: 20px;
-`;
-const SidebarTableWrapper = styled.div`
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 20px;
-
-    .s-t-header {
-        text-decoration: underline;
-        margin-bottom: 10px;
-        font-weight: bold;
-    }
-`;
-const SearchInputWrapper = styled.div`
-    display:flex;
-    flex-direction: column;
-    margin-bottom: 10px;
-    padding: 20px 5px;
-`;
-const SearchResult = styled.div`
-    display: flex;
-    font-size: 14px;
-    padding: 10px 5px;
-    background: #fff;
-    border-top: 1px solid #d8d8d8;
-
-    .search-result {
-        margin-right: 10px;
-    }
-`;
-
 const _getJSComponentType = ((list, type) => {
     return list.sort(function(a, b) {
         return b.deps.length - a.deps.length;
@@ -96,6 +34,7 @@ const _getJSDepsByPath = function(x, y) {
         return a.path.match(y);
     });
 };
+
 class Home extends Component {
     constructor() {
         super();
@@ -103,7 +42,7 @@ class Home extends Component {
         this.state = {
             searchResult: {
                 term: '',
-                value: ''
+                value: []
             }
         };
 
@@ -112,19 +51,23 @@ class Home extends Component {
     }
 
     handleInputChange(event) {
-        event.preventDefault();
+        // event.preventDefault();
     }
 
     handleKeyDown(event) {
-        if (event.key === 'Enter') {
-            const { jsComponentList } = this.props.data;
-            this.setState({
-                searchResult: {
-                    term: event.target.value,
-                    value: _getJSDepsByPath(jsComponentList, event.target.value).length
-                }
-            })
-        }
+        const { jsComponentList } = this.props.data;
+
+        const term = event.target.value;
+        const result = jsComponentList.filter(e => {
+            return e.name.match(term);
+        });
+
+        this.setState({
+            searchResult: {
+                term: event.target.value,
+                value: result
+            }
+        });
     }
 
     getTables(list, header, valueProperty) {
@@ -167,6 +110,10 @@ class Home extends Component {
             </Card>
         ));
 
+        let $searchResult = this.state.searchResult.value.map((e, idx) => {
+            return <div key={"search-result-" + idx}><Link to={"/js/" + e.name}>{e.name}</Link></div>
+        });
+
         return (
             <Layout>
                 <Content>
@@ -183,31 +130,13 @@ class Home extends Component {
                 </Content>
 
                 <Sidebar>
-                    <SidebarTableWrapper>
-                        <div className="s-t-header">by path</div>
-                        <SearchInputWrapper>
-                            <SearchInput type="search" onChange={this.handleInputChange} onKeyDown={this.handleKeyDown} placeholder="search by path" />
-                            {this.state.searchResult.term ? (
-                                <SearchResult>
-                                    <div className="search-result">{this.state.searchResult.term}</div>
-                                    <div className="search-value">{this.state.searchResult.value}</div>
-                                </SearchResult>
-                            ) : null}
-                        </SearchInputWrapper>
-
-
-                        <table>
-                            <tr><td>modules</td><td>{_getJSDepsByPath(jsComponentList, 'modules').length}</td></tr>
-                            <tr><td>base</td><td>{_getJSDepsByPath(jsComponentList, 'base').length}</td></tr>
-                            <tr><td>common</td><td>{_getJSDepsByPath(jsComponentList, 'common').length}</td></tr>
-                            <tr><td>widgets</td><td>{_getJSDepsByPath(jsComponentList, 'widgets').length}</td></tr>
-                            <tr><td>style-guide</td><td>{_getJSDepsByPath(jsComponentList, 'style-guide').length}</td></tr>
-                            <tr><td>test</td><td>{_getJSDepsByPath(jsComponentList, 'test').length}</td></tr>
-                        </table>
-                    </SidebarTableWrapper>
+                    <SearchInputWrapper>
+                        <SearchInput type="search" onChange={this.handleInputChange} onKeyDown={this.handleKeyDown} placeholder="search" />
+                        {this.state.searchResult.term? <SearchResult>{$searchResult}</SearchResult> : null}
+                    </SearchInputWrapper>
 
                     <SidebarTableWrapper>
-                        <div className="s-t-header">by angular component types</div>
+                        <div className="s-t-header">component types</div>
                         <table>
                             <tr><td>factories</td><td>{factories.length}</td></tr>
                             <tr><td>directives</td><td>{directives.length}</td></tr>
@@ -217,10 +146,10 @@ class Home extends Component {
                     </SidebarTableWrapper>
 
                     <div>
-                        <Panel title="factories" list={factories} />
-                        <Panel title="directives" list={directives} />
-                        <Panel title="controllers" list={controllers} />
-                        <Panel title="filters" list={filters} />
+                        <Panel title="factories" list={factories} color="#fd79a8" />
+                        <Panel title="directives" list={directives} color="#74b9ff" />
+                        <Panel title="controllers" list={controllers} color="#55efc4" />
+                        <Panel title="filters" list={filters} color="#fdcb6e" />
                     </div>
                 </Sidebar>
             </Layout>
@@ -229,3 +158,69 @@ class Home extends Component {
 }
 
 export default Home;
+
+const CardList = styled.div`
+    display: flex;
+    margin: 40px 0;
+
+    & > div {
+        margin-right: 20px;
+    }
+`;
+const Tables = styled.div`
+    display: flex;
+
+    table {
+        margin-right: 40px;
+    }
+
+    th {
+        text-align: left;
+        font-weight: bold;
+        padding-bottom: 20px;
+    }
+`;
+const Layout = styled.div`
+    display: flex;
+    padding: 0px 0 80px 80px;
+`;
+const Content = styled.div`
+    flex: 5;
+    margin-top: 40px;
+`;
+const Sidebar = styled.div`
+    flex:2;
+    background: #f4f6f8;
+    padding: 20px;
+    padding-top: 0px;
+`;
+const SidebarTableWrapper = styled.div`
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 40px;
+
+    .s-t-header {
+        text-decoration: underline;
+        margin-bottom: 20px;
+    }
+`;
+const SearchInputWrapper = styled.div`
+    display:flex;
+    flex-direction: column;
+    margin: 40px 0;
+`;
+const SearchResult = styled.div`
+    display: flex;
+    font-size: 14px;
+    flex-direction: column;
+    position: absolute;
+    top: 82px;
+    background: #fff;
+    padding: 10px 20px;
+    width: 252px;
+    flex-wrap: nowrap;
+
+    div {
+        word-wrap: break-word;
+    }
+`;

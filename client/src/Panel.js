@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
+import {Link} from 'react-router-dom';
 import styled from 'styled-components';
 
 import {Monospace} from './components';
@@ -13,7 +13,6 @@ const Wrapper = styled.div`
     margin-bottom: 20px;
 
     .s-t-header {
-        text-decoration: underline;
         margin-bottom: 10px;
         font-weight: bold;
     }
@@ -39,6 +38,16 @@ const Wrapper = styled.div`
     }
 `;
 
+const Label = styled.span`
+   background: ${(props) => props.color};
+   color: #fff;
+   font-size: 14px;
+   padding: 4px;
+   border-radius: 3px;
+   letter-spacing: 0.5px;
+   line-height: 1.4;
+`;
+
 class Panel extends Component {
     constructor(props) {
         super(props);
@@ -47,12 +56,14 @@ class Panel extends Component {
             min: MIN,
             max: MAX,
             list: this.props ? this.props.list : [],
-            controlSortType: 'asc'
+            controlSortType: 'asc',
+            more: 'more'
         };
 
         this.onIncrease = this.onIncrease.bind(this);
         this.onDecrease = this.onDecrease.bind(this);
         this.onToggleSort = this.onToggleSort.bind(this);
+        this.onToggleMore = this.onToggleMore.bind(this);
     }
 
     onIncrease() {
@@ -71,17 +82,31 @@ class Panel extends Component {
         })
     }
 
+    onToggleMore() {
+        if (this.state.more === 'more') {
+            this.setState({
+                max: this.state.list.length,
+                more: 'less'
+            });
+        } else {
+            this.setState({
+                max: MAX,
+                more: 'more'
+            });
+        }
+    }
+
     render() {
-        const { title } = this.props;
+        const { title, color } = this.props;
         const { min, max, list } = this.state;
 
         return (
             <Wrapper>
-                <div className="s-t-header">{title}</div>
+                <div className="s-t-header"><Label color={color}>{title}</Label></div>
                 <table>
                     {
                         list.slice(min, max).map((e, idx) => (
-                            <tr><td><Monospace>{e.name}</Monospace></td><td>{e.deps.length}</td></tr>
+                            <tr><td><Monospace><Link to={"/js/" + e.name}>{e.name}</Link></Monospace></td><td>{e.deps.length}</td></tr>
                         ))
                     }
                 </table>
@@ -89,6 +114,7 @@ class Panel extends Component {
                     <span onClick={this.onIncrease}>+</span>
                     <span onClick={this.onDecrease}>-</span>
                     <span className="text" onClick={this.onToggleSort}>{this.state.controlSortType}</span>
+                    <span className="text" onClick={this.onToggleMore}>{this.state.more}</span>
                 </div>
             </Wrapper>
         )

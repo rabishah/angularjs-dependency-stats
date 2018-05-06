@@ -1,65 +1,33 @@
 import React, { Component } from 'react';
+import {Link} from 'react-router-dom';
 import { Route } from 'react-router-dom';
 import styled from 'styled-components';
 
 import brace from 'brace';
 import { split as SplitEditor} from 'react-ace';
 
-
-import 'brace/mode/java';
+import 'brace/mode/javascript';
 import 'brace/theme/github';
 
-import {
-    SearchInput
-} from '../components';
+import {Monospace} from '../components';
 
 class JSDeps extends Component {
-    constructor() {
-        super();
-
-        this.state = {
-            term: '',
-            deps: {}
-        };
-
-        this.handleInputChange = this.handleInputChange.bind(this);
-        this.handleKeyDown = this.handleKeyDown.bind(this);
-    }
-
-    handleInputChange(event) {
-        event.preventDefault();
-    }
-
-    handleKeyDown(event) {
-        if (event.key === 'Enter') {
-            this.setState({
-                term: event.target.value
-            });
-        }
-    }
-
     render() {
         if (!this.props.data) {
             return null;
         }
 
-        console.log('this', this);
         const { match } = this.props;
 
         return (
             <Container>
-                <SearchInput
-                    placeholder="js"
-                    onChange={this.handleInputChange}
-                    onKeyDown={this.handleKeyDown}
-                />
-                <Route path={`${match.url}/:componentName`} render={(props) => <Info {...props} data={this.props.data} />} />
+                <Route path={`${match.url}/:componentName`} render={(props) => <Editor {...props} data={this.props.data} />} />
             </Container>
         );
     }
 }
 
-class Info extends Component {
+class Editor extends Component {
     constructor(props) {
         super(props);
 
@@ -96,49 +64,76 @@ class Info extends Component {
         return body;
     }
 
+    componentWillReceiveProps(nextProps) {
+        const { componentName } = nextProps.match.params;
+        this.loadInfo(componentName);
+    }
+
     componentWillMount() {
         const { componentName } = this.props.match.params;
-        const info = this.findComponent(componentName);
+        this.loadInfo(componentName);
+    }
 
-        if (!info) {
+    loadInfo(componentName) {
+        const info = this.findComponent(componentName);
+        if (!info || info.type !== "factory") {
             return this.setState({
                 'invalid': true
             });
         }
 
         this.setState(info);
+
         this.getFileSource(info.path)
-        .then(response => this.setState({ file: response }))
-        .catch(error => console.log(error));
+            .then(response => this.setState({ file: response }))
+            .catch(error => console.log(error));
+
         this.getTS(info.path)
-        .then(response => this.setState({ ts: response }))
-        .catch(error => console.log(error));
+            .then(response => this.setState({ ts: response }))
+            .catch(error => console.log(error));
     }
 
     onEditorChange(value) {
-        console.log(value);
+        // do nothing
     }
 
     render() {
-        console.log('apple', this.state);
-        const {name, type} = this.state;
+        const {name, type, deps} = this.state;
+
+        let $deps;
+        if (deps) {
+            $deps = deps.filter((e, idx) => {
+                var comp = this.findComponent(e);
+                if (comp && comp.type === 'factory') {
+                    return comp;
+                }
+            }).map((e, idx) => (
+                <li key={"link-deps-" + idx}><Monospace><Link to={"/js/" + e}>{e}</Link></Monospace></li>
+            ));
+        }
+
+        if (this.state.invalid) {
+            return (
+                <Title>Restricted to factories only.</Title>
+            )
+        }
+
         return (
             <div>
-                <h1>{name}</h1>
-                <h2>{type}</h2>
-                <EditorContainer>
-                    <SplitEditor
-                        mode="javascript"
-                        theme="github"
-                        splits={2}
-                        orientation="beside"
-                        value={[this.state.file ? this.state.file.info : '', this.state.ts ? this.state.ts.info : '']}
-                        name="ace-edito"
-                        width="100%"
-                        height="900px"
-                        editorProps={{$blockScrolling: true}}
-                    />
-                </EditorContainer>
+                <Title>{name}</Title>
+                <List><Heading>factory dependencies </Heading>{$deps}</List>
+                <Label>{type}</Label>
+                <SplitEditor
+                    mode="javascript"
+                    theme="github"
+                    splits={2}
+                    orientation="beside"
+                    value={[this.state.file ? this.state.file.info : '', this.state.ts ? this.state.ts.info : '']}
+                    name="ace-edito"
+                    width="100%"
+                    height="900px"
+                    editorProps={{$blockScrolling: true}}
+                />
             </div>
         )
     }
@@ -150,14 +145,31 @@ const Container = styled.div`
     padding: 80px;
 `;
 
-const SearchInputWrapper = styled.div`
-    display:flex;
-    flex-direction: column;
-    margin-bottom: 10px;
-    padding: 20px 5px;
+const Label = styled.span`
+    background: #fd79a8;
+    font-size: 14px;
+    color: #fff;
+    padding: 5px;
+    border-radius: 6px;
 `;
 
-const EditorContainer = styled.div`
-    // display:flex;
-    // justify-content: space-around;
+const List = styled.ul`
+    margin: 20px 0;
+    display: flex;
+    flex-wrap: wrap;
+
+    li {
+        margin-right: 5px;
+        margin-bottom: 5px;
+    }
+`;
+
+const Title = styled.h1`
+    font-size: 32px;
+`;
+
+const Heading = styled.span`
+    text-transform: lowercase;
+    line-height: 1.5;
+    margin-right: 5px;
 `;

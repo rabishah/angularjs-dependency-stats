@@ -5,26 +5,26 @@ import _Panel from './Panel';
 export const Panel = _Panel;
 
 export const Caption = styled.i`
-font-style: italic;
+    font-style: italic;
 `;
 
 export const Card = styled.div`
-background-color: #f4f6f8;
-padding: 10px;
-display: flex;
-flex-direction: column;
-align-items: center;
+    background-color: #f4f6f8;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 `;
 
 export const CardTitle = styled.div`
-text-decoration: underline;
-padding: 0 10px 10px 10px;
-font-size: 16px;
-font-weight: bold;
+    text-decoration: underline;
+    padding: 0 10px 10px 10px;
+    font-size: 16px;
+    font-weight: bold;
 `;
 
 export const CardValue = styled.div`
-font-size: 32px;
+    font-size: 32px;
 `;
 
 export const Title = styled.h1`
