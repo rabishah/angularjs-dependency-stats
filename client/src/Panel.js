@@ -60,10 +60,33 @@ class Panel extends Component {
             more: 'more'
         };
 
+        this.getCSV = this.getCSV.bind(this);
         this.onIncrease = this.onIncrease.bind(this);
         this.onDecrease = this.onDecrease.bind(this);
         this.onToggleSort = this.onToggleSort.bind(this);
         this.onToggleMore = this.onToggleMore.bind(this);
+    }
+
+    getCSV() {
+        const list = this.props.list;
+        const rows = list.map((e) => {
+            return [e.name, e.path.replace(/^.*thoughtspot/, ''), e.deps.toString().replace(/,/g, ';')]
+        });
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+
+        rows.forEach(function (rowArray) {
+            let row = rowArray.join(",");
+            csvContent += row + "\r\n";
+        });
+
+        var encodedUri = encodeURI(csvContent);
+        var link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", this.props.title + ".csv");
+        document.body.appendChild(link); // Required for FF
+        link.click();
+        document.body.removeChild(link);
     }
 
     onIncrease() {
@@ -115,6 +138,7 @@ class Panel extends Component {
                     <span onClick={this.onDecrease}>-</span>
                     <span className="text" onClick={this.onToggleSort}>{this.state.controlSortType}</span>
                     <span className="text" onClick={this.onToggleMore}>{this.state.more}</span>
+                    <span className="text" onClick={this.getCSV}>csv</span>
                 </div>
             </Wrapper>
         )
