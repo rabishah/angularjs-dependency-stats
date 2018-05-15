@@ -100,7 +100,7 @@ class Editor extends Component {
     render() {
         const {name, type, deps} = this.state;
 
-        let $deps;
+        let $deps = [], $tsDeps = [];
         if (deps) {
             $deps = deps.filter((e, idx) => {
                 var comp = this.findComponent(e);
@@ -109,6 +109,15 @@ class Editor extends Component {
                 }
             }).map((e, idx) => (
                 <li key={"link-deps-" + idx}><Monospace><Link to={"/js/" + e}>{e}</Link></Monospace></li>
+            ));
+
+            $tsDeps = deps.filter((e, idx) => {
+                var comp = this.findComponent(e);
+                if (comp === null && e[0] !== '$') {
+                    return true;
+                }
+            }).map((e, idx) => (
+                <li key={"link-ts-module-deps-" + idx}><Monospace>{e}</Monospace></li>
             ));
         }
 
@@ -121,7 +130,8 @@ class Editor extends Component {
         return (
             <div>
                 <Title>{name}</Title>
-                <List><Heading>factory dependencies </Heading>{$deps}</List>
+                <List><Heading>factory dependencies </Heading>{$deps.length ? $deps : '0'}</List>
+                <List><Heading>Typescript modules</Heading>{$tsDeps.length ? $tsDeps : '0'}</List>
                 <Label>{type}</Label>
                 <SplitEditor
                     mode="javascript"
