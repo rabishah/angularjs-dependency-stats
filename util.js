@@ -2,7 +2,7 @@
 
 function getJSContentInfo(content, path) {
     const info = [];
-    const regExp1 = /blink\.app\.((?!.*?component).*)\(\'(.*?),((.|\n)*?)function\s*[^\(]*\(\s*([^\)]*)\)/g;
+    const regExp1 = /legacy\.app\.((?!.*?component).*)\(\'(.*?),((.|\n)*?)function\s*[^\(]*\(\s*([^\)]*)\)/g;
 
     let match = regExp1.exec(content);
 
